@@ -28,19 +28,19 @@ Note that the `Access-Control-Allow-Origin` header can only return a single valu
 
 We will assume you have an existing ASGI app, in a variable called `app`.
 
-First, import the `asgi_cors` decorator function:
+First, import the `asgi_cors` function:
 
     from asgi_cors import asgi_cors
 
 To enable CORS headers for everywhere (by adding the `Access-Control-Allow-Origin: *` header to every request), do this:
 
-    app = asgi_cors(allow_all=True)(app)
+    app = asgi_cors(app, allow_all=True)
 
 If you wish to only allow it from a specific host, use the following:
 
-    app = asgi_cors(hosts=[
+    app = asgi_cors(app, hosts=[
         "https://www.example.com"
-    ])(app)
+    ])
 
 Now JavaScript executing on https://www.example.com will be able to call your API. You can test this out by opening up example.com in your browser, opening your browser's devtools console and pasting in the following JavaScript:
 
@@ -50,17 +50,20 @@ You can include multiple hosts in the list.
 
 Finally, if you want to open your application up to requests from a wildcard-defined selection of hosts, use the following:
 
-    app = asgi_cors(host_wildcards=[
+    app = asgi_cors(app, host_wildcards=[
         "http://localhost:800*",
         "http://*.example.com"
-    ])(app)
+    ])
 
 This will enable access from any JavaScript running on a local host server on ports 8000 through 8009 - or from any subdomain of example.com.
 
 ## Using the middleware as a decorator
 
-If you are defining an ASGI application as a function, you can use this middleware as a function decorator like so:
+If you are defining your ASGI application directly as a function, you can use the `asgi_cors_decorator` function decorator like so:
 
-    @asgi_cors(allow_all=True)
+    from asgi_cors import asgi_cors_decorator
+
+
+    @asgi_cors_decorator(allow_all=True)
     async def my_asgi_app(scope, recieve, send):
         # Your app goes here

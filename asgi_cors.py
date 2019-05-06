@@ -2,7 +2,7 @@ import fnmatch
 from functools import wraps
 
 
-def asgi_cors(allow_all=False, hosts=None, host_wildcards=None):
+def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
     hosts = hosts or []
     host_wildcards = host_wildcards or []
 
@@ -17,7 +17,7 @@ def asgi_cors(allow_all=False, hosts=None, host_wildcards=None):
     ):
         assert False, "Error: CORS origin rules should never end in a /"
 
-    def asgi_cors_decorator(app):
+    def _asgi_cors_decorator(app):
         @wraps(app)
         async def app_wrapped_with_cors(scope, recieve, send):
             async def wrapped_send(event):
@@ -59,4 +59,8 @@ def asgi_cors(allow_all=False, hosts=None, host_wildcards=None):
 
         return app_wrapped_with_cors
 
-    return asgi_cors_decorator
+    return _asgi_cors_decorator
+
+
+def asgi_cors(app, allow_all=False, hosts=None, host_wildcards=None):
+    return asgi_cors_decorator(allow_all, hosts, host_wildcards)(app)
