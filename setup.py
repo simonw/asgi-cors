@@ -23,5 +23,6 @@ setup(
     version=VERSION,
     py_modules=["asgi_cors"],
     install_requires=[],
-    tests_require=["pytest", "pytest-asyncio"],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "pytest-asyncio", "asgiref==3.1.2"],
 )
