@@ -49,7 +49,6 @@ EXAMPLE_HOST = b"http://example.com"
     [
         (None, None),
         (EXAMPLE_HOST, EXAMPLE_HOST),
-        (EXAMPLE_HOST, EXAMPLE_HOST),
         (b"http://foo.com", None),
     ],
 )
@@ -67,7 +66,6 @@ PORT_WILDCARD = [b"http://localhost:8*"]
     "wildcards,request_origin,expected_cors_header",
     [
         (SUBDOMAIN_WILDCARD, None, None),
-        (SUBDOMAIN_WILDCARD, b"https://www.example.com", b"https://www.example.com"),
         (SUBDOMAIN_WILDCARD, b"https://www.example.com", b"https://www.example.com"),
         (SUBDOMAIN_WILDCARD, b"https://foo.com", None),
         (PORT_WILDCARD, b"http://foo.com", None),
