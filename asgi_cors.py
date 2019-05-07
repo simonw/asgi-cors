@@ -27,7 +27,9 @@ def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
                     if allow_all:
                         access_control_allow_origin = b"*"
                     elif hosts or host_wildcards:
-                        incoming_origin = dict(scope["headers"]).get(b"origin")
+                        incoming_origin = dict(scope.get("headers") or []).get(
+                            b"origin"
+                        )
                         if incoming_origin:
                             matches_hosts = incoming_origin in hosts
                             matches_wildcards = any(

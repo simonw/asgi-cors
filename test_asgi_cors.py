@@ -16,7 +16,7 @@ async def hello_world_app(scope, receive, send):
 
 
 @pytest.mark.asyncio
-async def test_app_has_no_cors_header():
+async def test_hello_world_app_has_no_cors_header():
     instance = ApplicationCommunicator(
         hello_world_app,
         {"type": "http", "http_version": "1.0", "method": "GET", "path": "/"},
@@ -34,17 +34,57 @@ async def test_app_has_no_cors_header():
 
 
 @pytest.mark.asyncio
-async def test_app_with_cors_header():
-    instance = ApplicationCommunicator(
-        asgi_cors(hello_world_app, allow_all=True),
-        {"type": "http", "http_version": "1.0", "method": "GET", "path": "/"},
-    )
+async def test_allow_all():
+    app = asgi_cors(hello_world_app, allow_all=True)
+    header = await get_cors_header(app)
+    assert b"*" == header
+
+
+EXAMPLE_HOST = b"http://example.com"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "request_origin,expected_cors_header",
+    [
+        (None, None),
+        (EXAMPLE_HOST, EXAMPLE_HOST),
+        (EXAMPLE_HOST, EXAMPLE_HOST),
+        (b"http://foo.com", None),
+    ],
+)
+async def test_whitelisted_hosts(request_origin, expected_cors_header):
+    app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST])
+    assert expected_cors_header == await get_cors_header(app, request_origin)
+
+
+SUBDOMAIN_WILDCARD = [b"https://*.example.com"]
+PORT_WILDCARD = [b"http://localhost:8*"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "wildcards,request_origin,expected_cors_header",
+    [
+        (SUBDOMAIN_WILDCARD, None, None),
+        (SUBDOMAIN_WILDCARD, b"https://www.example.com", b"https://www.example.com"),
+        (SUBDOMAIN_WILDCARD, b"https://www.example.com", b"https://www.example.com"),
+        (SUBDOMAIN_WILDCARD, b"https://foo.com", None),
+        (PORT_WILDCARD, b"http://foo.com", None),
+        (PORT_WILDCARD, b"http://localhost:8000", b"http://localhost:8000"),
+    ],
+)
+async def test_wildcard_hosts(wildcards, request_origin, expected_cors_header):
+    app = asgi_cors(hello_world_app, host_wildcards=wildcards)
+    assert expected_cors_header == await get_cors_header(app, request_origin)
+
+
+async def get_cors_header(app, request_origin=None, expected_status=200):
+    scope = {"type": "http", "http_version": "1.0", "method": "GET", "path": "/"}
+    if request_origin is not None:
+        scope["headers"] = [[b"origin", request_origin]]
+    instance = ApplicationCommunicator(app, scope)
     await instance.send_input({"type": "http.request"})
-    assert (await instance.receive_output(1)) == {
-        "type": "http.response.start",
-        "status": 200,
-        "headers": [
-            [b"content-type", b"application/json"],
-            [b"access-control-allow-origin", b"*"],
-        ],
-    }
+    event = await instance.receive_output(1)
+    assert expected_status == event["status"]
+    return dict(event.get("headers") or []).get(b"access-control-allow-origin")
