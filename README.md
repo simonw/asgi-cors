@@ -65,7 +65,7 @@ If you need to do something more complicated that cannot be expressed using the 
 
     def validate_origin(origin):
         return origin.startswith("https://")
-    
+
     app = asgi_cors(app, callback=validate_origin)
 
 Your callback function will be passed the `Origin` header that was passed in by the browser.
