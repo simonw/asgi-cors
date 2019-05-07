@@ -1,5 +1,9 @@
 # asgi-cors
 
+[![PyPI](https://img.shields.io/pypi/v/asgi-cors.svg)](https://pypi.org/project/asgi-cors/)
+[![CircleCI](https://circleci.com/gh/simonw/asgi-cors.svg?style=svg)](https://circleci.com/gh/simonw/asgi-cors)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/asgi-cors/blob/master/LICENSE)
+
 ASGI middleware for applying CORS headers to an ASGI application.
 
 ## Installation
