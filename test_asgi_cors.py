@@ -77,6 +77,23 @@ async def test_wildcard_hosts(wildcards, request_origin, expected_cors_header):
     assert expected_cors_header == await get_cors_header(app, request_origin)
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "callback_return,expected_cors_header", [(True, EXAMPLE_HOST), (False, None)]
+)
+async def test_callback(callback_return, expected_cors_header):
+    was_called = False
+
+    def callback(origin):
+        nonlocal was_called
+        was_called = True
+        return callback_return
+
+    app = asgi_cors(hello_world_app, callback=callback)
+    assert expected_cors_header == await get_cors_header(app, EXAMPLE_HOST)
+    assert was_called
+
+
 async def get_cors_header(app, request_origin=None, expected_status=200):
     scope = {"type": "http", "http_version": "1.0", "method": "GET", "path": "/"}
     if request_origin is not None:

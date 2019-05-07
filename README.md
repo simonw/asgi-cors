@@ -61,6 +61,15 @@ Finally, if you want to open your application up to requests from a wildcard-def
 
 This will enable access from any JavaScript running on a local host server on ports 8000 through 8009 - or from any subdomain of example.com.
 
+If you need to do something more complicated that cannot be expressed using the `hosts=` or `host_wildcards=` parameters, you can use `callback=` to specify a custom function. For example:
+
+    def validate_origin(origin):
+        return origin.startswith("https://")
+    
+    app = asgi_cors(app, callback=validate_origin)
+
+Your callback function will be passed the `Origin` header that was passed in by the browser.
+
 ## Using the middleware as a decorator
 
 If you are defining your ASGI application directly as a function, you can use the `asgi_cors_decorator` function decorator like so:

@@ -2,7 +2,9 @@ import fnmatch
 from functools import wraps
 
 
-def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
+def asgi_cors_decorator(
+    allow_all=False, hosts=None, host_wildcards=None, callback=None
+):
     hosts = hosts or []
     host_wildcards = host_wildcards or []
 
@@ -26,7 +28,7 @@ def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
                     access_control_allow_origin = None
                     if allow_all:
                         access_control_allow_origin = b"*"
-                    elif hosts or host_wildcards:
+                    elif hosts or host_wildcards or callback:
                         incoming_origin = dict(scope.get("headers") or []).get(
                             b"origin"
                         )
@@ -36,7 +38,10 @@ def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
                                 fnmatch.fnmatch(incoming_origin, host_wildcard)
                                 for host_wildcard in host_wildcards
                             )
-                            if matches_hosts or matches_wildcards:
+                            matches_callback = False
+                            if callback is not None:
+                                matches_callback = callback(incoming_origin)
+                            if matches_hosts or matches_wildcards or matches_callback:
                                 access_control_allow_origin = incoming_origin
                     if access_control_allow_origin is not None:
                         # Construct a new event with new headers
@@ -64,5 +69,5 @@ def asgi_cors_decorator(allow_all=False, hosts=None, host_wildcards=None):
     return _asgi_cors_decorator
 
 
-def asgi_cors(app, allow_all=False, hosts=None, host_wildcards=None):
-    return asgi_cors_decorator(allow_all, hosts, host_wildcards)(app)
+def asgi_cors(app, allow_all=False, hosts=None, host_wildcards=None, callback=None):
+    return asgi_cors_decorator(allow_all, hosts, host_wildcards, callback)(app)
