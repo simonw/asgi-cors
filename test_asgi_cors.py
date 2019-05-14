@@ -46,11 +46,7 @@ EXAMPLE_HOST = b"http://example.com"
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "request_origin,expected_cors_header",
-    [
-        (None, None),
-        (EXAMPLE_HOST, EXAMPLE_HOST),
-        (b"http://foo.com", None),
-    ],
+    [(None, None), (EXAMPLE_HOST, EXAMPLE_HOST), (b"http://foo.com", None)],
 )
 async def test_whitelisted_hosts(request_origin, expected_cors_header):
     app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST])
@@ -103,3 +99,24 @@ async def get_cors_header(app, request_origin=None, expected_status=200):
     event = await instance.receive_output(1)
     assert expected_status == event["status"]
     return dict(event.get("headers") or []).get(b"access-control-allow-origin")
+
+
+@pytest.mark.asyncio
+async def test_callback_async():
+    was_called = False
+
+    async def callback_true(origin):
+        nonlocal was_called
+        was_called = True
+        return True
+
+    async def callback_false(origin):
+        return False
+
+    assert EXAMPLE_HOST == await get_cors_header(
+        asgi_cors(hello_world_app, callback=callback_true), EXAMPLE_HOST
+    )
+    assert None == await get_cors_header(
+        asgi_cors(hello_world_app, callback=callback_false), EXAMPLE_HOST
+    )
+    assert was_called

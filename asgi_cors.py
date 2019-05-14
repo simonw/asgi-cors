@@ -1,4 +1,5 @@
 import fnmatch
+import asyncio
 from functools import wraps
 
 
@@ -40,7 +41,10 @@ def asgi_cors_decorator(
                             )
                             matches_callback = False
                             if callback is not None:
-                                matches_callback = callback(incoming_origin)
+                                if asyncio.iscoroutinefunction(callback):
+                                    matches_callback = await callback(incoming_origin)
+                                else:
+                                    matches_callback = callback(incoming_origin)
                             if matches_hosts or matches_wildcards or matches_callback:
                                 access_control_allow_origin = incoming_origin
                     if access_control_allow_origin is not None:
