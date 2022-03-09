@@ -75,13 +75,13 @@ def asgi_cors_decorator(
                             + [
                                 [
                                     b"access-control-allow-headers",
-                                    access_control_allow_headers.join(", "),
+                                    b", ".join(access_control_allow_headers),
                                 ]
                             ]
                             + [
                                 [
                                     b"access-control-allow-methods",
-                                    access_control_allow_methods.join(", "),
+                                    b", ".join(access_control_allow_methods),
                                 ]
                             ],
                         }
