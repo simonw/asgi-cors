@@ -28,6 +28,18 @@ For these cases, the server needs to inspect the Origin header from the client a
 
 Note that the `Access-Control-Allow-Origin` header can only return a single value. This means that if you want to allow requests from multiple origins you need to dynamically whitelist those origins and return a different header value depending on the incoming request.
 
+Additionally if specific HTTP methods should be allowed an application should add:
+
+    Access-Control-Allow-Methods: GET, OPTIONS
+
+Here `GET` and `OPTIONS` are allowed.
+
+Similarly specific headers can be allowed:
+
+    Access-Control-Allow-Headers: content-type, Authorization
+
+In this case `content-type` and `Authorization` headers are allowed to be sent to the server in a CORS request.
+
 ## How to use this middleware
 
 We will assume you have an existing ASGI app, in a variable called `app`.
@@ -69,6 +81,15 @@ If you need to do something more complicated that cannot be expressed using the 
     app = asgi_cors(app, callback=validate_origin)
 
 Your callback function will be passed the `Origin` header that was passed in by the browser.
+
+To add specific allowed headers or methods you can specify them with the `headers=` and `methods=` parameters:
+
+    app = asgi_cors(app, methods=[
+        "GET", "OPTIONS"
+    ], headers=[
+        "Authorization","content-type"
+    ])
+
 
 ## Using the middleware as a decorator
 
