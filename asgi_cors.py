@@ -94,5 +94,5 @@ def asgi_cors_decorator(
     return _asgi_cors_decorator
 
 
-def asgi_cors(app, allow_all=False, hosts=None, host_wildcards=None, callback=None):
-    return asgi_cors_decorator(allow_all, hosts, host_wildcards, callback)(app)
+def asgi_cors(app, allow_all=False, hosts=None, host_wildcards=None, callback=None, headers=None, methods=None):
+    return asgi_cors_decorator(allow_all, hosts, host_wildcards, callback, headers, methods)(app)
