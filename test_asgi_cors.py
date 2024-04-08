@@ -48,6 +48,9 @@ async def test_allowlisted_hosts(request_origin, expected_cors_header):
         assert (
             response.headers.get("access-control-allow-origin") == expected_cors_header
         )
+        # Should not have other headers
+        for header in ("access-control-allow-headers", "access-control-allow-methods"):
+            assert header not in response.headers
 
 
 SUBDOMAIN_WILDCARD = ["https://*.example.com"]
@@ -132,7 +135,7 @@ async def test_callback_async():
 @pytest.mark.parametrize(
     "headers,expected_headers",
     [
-        (None, ["content-type"]),
+        (None, []),
         (["x-custom-header"], ["x-custom-header"]),
         (["x-custom-header", "Authorization"], ["x-custom-header", "Authorization"]),
     ],
@@ -143,16 +146,19 @@ async def test_allowed_headers(headers, expected_headers):
         response = await client.get(
             "http://localhost/", headers={"origin": EXAMPLE_HOST}
         )
-        assert response.headers.get("access-control-allow-headers") == ", ".join(
-            expected_headers
-        )
+        if expected_headers:
+            assert response.headers.get("access-control-allow-headers") == ", ".join(
+                expected_headers
+            )
+        else:
+            assert "access-control-allow-headers" not in response.headers
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "methods,expected_methods",
     [
-        (None, ["GET"]),
+        (None, []),
         (["POST"], ["POST"]),
         (["GET", "OPTIONS"], ["GET", "OPTIONS"]),
     ],
@@ -163,6 +169,9 @@ async def test_allowed_methods(methods, expected_methods):
         response = await client.get(
             "http://localhost/", headers={"origin": EXAMPLE_HOST}
         )
-        assert response.headers.get("access-control-allow-methods") == ", ".join(
-            expected_methods
-        )
+        if expected_methods:
+            assert response.headers.get("access-control-allow-methods") == ", ".join(
+                expected_methods
+            )
+        else:
+            assert "access-control-allow-methods" not in response.headers

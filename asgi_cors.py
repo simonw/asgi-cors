@@ -56,49 +56,51 @@ def asgi_cors_decorator(
                                     matches_callback = callback(incoming_origin)
                             if matches_hosts or matches_wildcards or matches_callback:
                                 access_control_allow_origin = incoming_origin
-                    access_control_allow_headers = ["content-type"]
-                    if headers:
-                        access_control_allow_headers = headers
-                    access_control_allow_methods = ["GET"]
-                    if methods:
-                        access_control_allow_methods = methods
 
                     if access_control_allow_origin is not None:
                         # Construct a new event with new headers
-                        event = {
-                            "type": "http.response.start",
-                            "status": event["status"],
-                            "headers": [
-                                p
-                                for p in original_headers
-                                if p[0] != b"access-control-allow-origin"
-                                and p[0] != b"access-control-allow-headers"
-                                and p[0] != b"access-control-allow-methods"
-                            ]
-                            + [
+                        new_headers = [
+                            p
+                            for p in original_headers
+                            if p[0]
+                            not in (
+                                b"access-control-allow-origin"
+                                b"access-control-allow-headers"
+                                b"access-control-allow-methods",
+                                b"access-control-max-age",
+                            )
+                        ]
+                        if access_control_allow_origin:
+                            new_headers.append(
                                 [
                                     b"access-control-allow-origin",
                                     access_control_allow_origin,
                                 ]
-                            ]
-                            + [
+                            )
+                        if headers:
+                            new_headers.append(
                                 [
                                     b"access-control-allow-headers",
                                     b", ".join(
                                         h.encode("utf-8") if isinstance(h, str) else h
-                                        for h in access_control_allow_headers
+                                        for h in headers
                                     ),
                                 ]
-                            ]
-                            + [
+                            )
+                        if methods:
+                            new_headers.append(
                                 [
                                     b"access-control-allow-methods",
                                     b", ".join(
                                         m.encode("utf-8") if isinstance(m, str) else m
-                                        for m in access_control_allow_methods
+                                        for m in methods
                                     ),
                                 ]
-                            ],
+                            )
+                        event = {
+                            "type": "http.response.start",
+                            "status": event["status"],
+                            "headers": new_headers,
                         }
                 await send(event)
 
