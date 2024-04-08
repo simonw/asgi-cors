@@ -100,6 +100,6 @@ from asgi_cors import asgi_cors_decorator
 
 
 @asgi_cors_decorator(allow_all=True)
-async def my_asgi_app(scope, recieve, send):
+async def my_asgi_app(scope, receive, send):
     # Your app goes here
 ```

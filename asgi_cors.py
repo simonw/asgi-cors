@@ -31,7 +31,7 @@ def asgi_cors_decorator(
 
     def _asgi_cors_decorator(app):
         @wraps(app)
-        async def app_wrapped_with_cors(scope, recieve, send):
+        async def app_wrapped_with_cors(scope, receive, send):
             async def wrapped_send(event):
                 if event["type"] == "http.response.start":
                     original_headers = event.get("headers") or []
@@ -104,7 +104,7 @@ def asgi_cors_decorator(
                         }
                 await send(event)
 
-            await app(scope, recieve, wrapped_send)
+            await app(scope, receive, wrapped_send)
 
         return app_wrapped_with_cors
 
