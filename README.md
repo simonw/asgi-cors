@@ -27,7 +27,7 @@ For these cases, the server needs to inspect the Origin header from the client a
 ```
 Access-Control-Allow-Origin: http://localhost:8000
 ```
-Note that the `Access-Control-Allow-Origin` header can only return a single value. This means that if you want to allow requests from multiple origins you need to dynamically whitelist those origins and return a different header value depending on the incoming request.
+Note that the `Access-Control-Allow-Origin` header can only return a single value. This means that if you want to allow requests from multiple origins you need to dynamically allowlist those origins and return a different header value depending on the incoming request.
 
 Additionally if specific HTTP methods should be allowed an application should add:
 ```

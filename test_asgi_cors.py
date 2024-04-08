@@ -40,7 +40,7 @@ EXAMPLE_HOST = "http://example.com"
     "request_origin,expected_cors_header",
     [(None, None), (EXAMPLE_HOST, EXAMPLE_HOST), ("http://foo.com", None)],
 )
-async def test_whitelisted_hosts(request_origin, expected_cors_header):
+async def test_allowlisted_hosts(request_origin, expected_cors_header):
     app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST])
     async with httpx.AsyncClient(app=app) as client:
         headers = {"origin": request_origin} if request_origin else {}
