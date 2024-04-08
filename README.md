@@ -41,6 +41,10 @@ Access-Control-Allow-Headers: content-type, Authorization
 ```
 In this case `content-type` and `Authorization` headers are allowed to be sent to the server in a CORS request.
 
+Verbs other than `GET` (such as `POST`) will trigger a preflight request. This is an `OPTIONS` request that the browser sends to the server to ask if the server will accept the request.
+
+The `access-control-max-age` header can be used to specify how long the results of a preflight request can be cached. This can reduce the number of requests made to the server.
+
 ## How to use this middleware
 
 We will assume you have an existing ASGI app, in a variable called `app`.
@@ -65,7 +69,7 @@ fetch("https://your-api.com/").then(r => r.json()).then(d => console.log(d))
 ```
 You can include multiple hosts in the list.
 
-Finally, if you want to open your application up to requests from a wildcard-defined selection of hosts, use the following:
+If you want to open your application up to requests from a wildcard-defined selection of hosts, use the following:
 ```python
 app = asgi_cors(app, host_wildcards=[
     "http://localhost:800*",
@@ -81,7 +85,7 @@ def validate_origin(origin):
 
 app = asgi_cors(app, callback=validate_origin)
 ```
-Your callback function will be passed the `Origin` header that was passed in by the browser.
+Your callback function will be passed the `Origin` header that was passed in by the browser. Both regular and async functions are supported.
 
 To add specific allowed headers or methods you can specify them with the `headers=` and `methods=` parameters:
 ```python
@@ -90,6 +94,11 @@ app = asgi_cors(app, methods=[
 ], headers=[
     "Authorization","content-type"
 ])
+```
+To set a `access-control-max-age` header, use the `max_age=` parameter:
+
+```python
+app = asgi_cors(app, host_wildcards=["*"], max_age=3600)
 ```
 
 ## Using the middleware as a decorator

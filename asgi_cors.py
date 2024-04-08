@@ -10,6 +10,7 @@ def asgi_cors_decorator(
     callback=None,
     headers=None,
     methods=None,
+    max_age=None,
 ):
     hosts = hosts or []
     host_wildcards = host_wildcards or []
@@ -97,6 +98,10 @@ def asgi_cors_decorator(
                                     ),
                                 ]
                             )
+                        if max_age:
+                            new_headers.append(
+                                [b"access-control-max-age", str(max_age)]
+                            )
                         event = {
                             "type": "http.response.start",
                             "status": event["status"],
@@ -119,7 +124,8 @@ def asgi_cors(
     callback=None,
     headers=None,
     methods=None,
+    max_age=None,
 ):
     return asgi_cors_decorator(
-        allow_all, hosts, host_wildcards, callback, headers, methods
+        allow_all, hosts, host_wildcards, callback, headers, methods, max_age
     )(app)

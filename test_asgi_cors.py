@@ -175,3 +175,25 @@ async def test_allowed_methods(methods, expected_methods):
             )
         else:
             assert "access-control-allow-methods" not in response.headers
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "max_age,expected_max_age",
+    [
+        (None, None),
+        (3200, 3200),
+    ],
+)
+async def test_max_age(max_age, expected_max_age):
+    app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST], max_age=max_age)
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get(
+            "http://localhost/", headers={"origin": EXAMPLE_HOST}
+        )
+        if expected_max_age:
+            assert response.headers.get("access-control-max-age") == str(
+                expected_max_age
+            )
+        else:
+            assert "access-control-max_age" not in response.headers
