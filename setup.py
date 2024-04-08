@@ -22,12 +22,6 @@ setup(
     license="Apache License, Version 2.0",
     version=VERSION,
     py_modules=["asgi_cors"],
-    extras_require={
-        "test": [
-            "pytest",
-            "pytest-asyncio",
-            "asgiref==3.1.2",
-        ]
-    },
+    extras_require={"test": ["pytest", "pytest-asyncio", "httpx"]},
     setup_requires=["pytest-runner"],
 )
