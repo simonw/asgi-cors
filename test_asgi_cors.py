@@ -126,3 +126,43 @@ async def test_callback_async():
         assert "access-control-allow-origin" not in response.headers
 
     assert was_called
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "headers,expected_headers",
+    [
+        (None, ["content-type"]),
+        (["x-custom-header"], ["x-custom-header"]),
+        (["x-custom-header", "Authorization"], ["x-custom-header", "Authorization"]),
+    ],
+)
+async def test_allowed_headers(headers, expected_headers):
+    app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST], headers=headers)
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get(
+            "http://localhost/", headers={"origin": EXAMPLE_HOST}
+        )
+        assert response.headers.get("access-control-allow-headers") == ", ".join(
+            expected_headers
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "methods,expected_methods",
+    [
+        (None, ["GET"]),
+        (["POST"], ["POST"]),
+        (["GET", "OPTIONS"], ["GET", "OPTIONS"]),
+    ],
+)
+async def test_allowed_methods(methods, expected_methods):
+    app = asgi_cors(hello_world_app, hosts=[EXAMPLE_HOST], methods=methods)
+    async with httpx.AsyncClient(app=app) as client:
+        response = await client.get(
+            "http://localhost/", headers={"origin": EXAMPLE_HOST}
+        )
+        assert response.headers.get("access-control-allow-methods") == ", ".join(
+            expected_methods
+        )

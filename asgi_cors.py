@@ -85,7 +85,7 @@ def asgi_cors_decorator(
                                 [
                                     b"access-control-allow-headers",
                                     b", ".join(
-                                        h.encode("utf-8")
+                                        h.encode("utf-8") if isinstance(h, str) else h
                                         for h in access_control_allow_headers
                                     ),
                                 ]
@@ -94,7 +94,7 @@ def asgi_cors_decorator(
                                 [
                                     b"access-control-allow-methods",
                                     b", ".join(
-                                        m.encode("utf-8")
+                                        m.encode("utf-8") if isinstance(m, str) else m
                                         for m in access_control_allow_methods
                                     ),
                                 ]
