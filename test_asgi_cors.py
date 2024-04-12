@@ -15,6 +15,21 @@ async def hello_world_app(scope, receive, send):
     await send({"type": "http.response.body", "body": b'{"hello": "world"}'})
 
 
+async def hello_world_app_cors_enabled(scope, receive, send):
+    assert scope["type"] == "http"
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [
+                [b"content-type", b"application/json"],
+                [b"access-control-allow-origin", b"*"],
+            ],
+        }
+    )
+    await send({"type": "http.response.body", "body": b'{"hello": "world"}'})
+
+
 @pytest.mark.asyncio
 async def test_hello_world_app_has_no_cors_header():
     async with httpx.AsyncClient(app=hello_world_app) as client:
@@ -197,3 +212,27 @@ async def test_max_age(max_age, expected_max_age):
             )
         else:
             assert "access-control-max_age" not in response.headers
+
+
+@pytest.mark.asyncio
+async def test_does_not_duplicate_headers():
+    app = asgi_cors(hello_world_app_cors_enabled, allow_all=True)
+    # This time we call it without HTTPX, because HTTPX combines multiple
+    # headers into a single comma-separated list
+    scope = {"type": "http", "headers": []}
+
+    async def receive():
+        pass
+
+    headers = []
+
+    async def send(event):
+        nonlocal headers
+        if event["type"] == "http.response.start":
+            headers = event["headers"]
+
+    await app(scope, receive, send)
+    assert headers == [
+        [b"content-type", b"application/json"],
+        [b"access-control-allow-origin", b"*"],
+    ]

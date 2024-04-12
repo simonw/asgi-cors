@@ -65,8 +65,8 @@ def asgi_cors_decorator(
                             for p in original_headers
                             if p[0]
                             not in (
-                                b"access-control-allow-origin"
-                                b"access-control-allow-headers"
+                                b"access-control-allow-origin",
+                                b"access-control-allow-headers",
                                 b"access-control-allow-methods",
                                 b"access-control-max-age",
                             )
